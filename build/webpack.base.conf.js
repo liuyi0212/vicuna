@@ -1,5 +1,3 @@
-'use strict'
-const path = require('path')
 const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
@@ -9,9 +7,10 @@ function resolve (dir) {
 }
 
 module.exports = {
-  entry: {
-    app: './src/main.js'
-  },
+  entry: Object.keys(utils.entries).reduce((r, key) => {
+    r[key] = utils.entries[key].path;
+    return r;
+  }, {}),
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',

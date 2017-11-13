@@ -1,4 +1,3 @@
-'use strict'
 const path = require('path')
 const config = require('../config')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
@@ -70,3 +69,35 @@ exports.styleLoaders = function (options) {
   }
   return output
 }
+
+exports.getEntries = () => {
+  const entries = {};
+  let moduleConfig;
+  try {
+    moduleConfig = require('../module.config.json');
+  }
+  catch (e) {
+    moduleConfig = {};
+  }
+  glob.sync('src/*/module.json').forEach(file => {
+    const module = JSON.parse(fs.readFileSync(path.join(__dirname, '..', file)).toString());
+    const { name, entry } = module;
+    if (moduleConfig.includes && moduleConfig.includes.length) {
+      if (moduleConfig.includes.indexOf(name) < 0) {
+        return;
+      }
+    }
+    if (moduleConfig.excludes && moduleConfig.excludes.length) {
+      if (moduleConfig.excludes.indexOf(name) >= 0) {
+        return;
+      }
+    }
+    entries[name] = {
+      path: file.replace('module.json', entry),
+      data: module
+    };
+  });
+  return entries;
+};
+
+exports.entries = exports.getEntries();
